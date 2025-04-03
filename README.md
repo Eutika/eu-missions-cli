@@ -1,3 +1,7 @@
+<p align="center">
+   <img width="auto" height="300" src="https://github.com/user-attachments/assets/26ff6ec2-1dc4-452b-9442-d66f20138073">
+</p>
+
 # Missions CLI
 
 [![Release](https://img.shields.io/github/release/eutika/eu-missions-cli.svg)](https://github.com/eutika/eu-missions-cli/releases)
