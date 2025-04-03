@@ -6,7 +6,7 @@ REPO_NAME="${REPO_NAME:-eu-missions-cli}"        # Repository name
 OUTPUT_DIR="${OUTPUT_DIR:-./}"     # Directory to save the binary
 
 # Validate required environment variables
-if [  [ -z "$REPO_OWNER" ] || [ -z "$REPO_NAME" ]; then
+if [ -z "$REPO_OWNER" ] || [ -z "$REPO_NAME" ]; then
     echo "Error: Missing required environment variables"
     echo "Please set: REPO_OWNER, and REPO_NAME"
     exit 1
