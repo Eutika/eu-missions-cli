@@ -74,7 +74,6 @@ func (c *Config) GetRemoteURL() string {
 
 	// Check for environment variable, use it if set
 	if envURL := os.Getenv("MISSIONS_CLI_URL"); envURL != "" {
-
 		return envURL
 	}
 

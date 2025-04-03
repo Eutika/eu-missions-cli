@@ -51,17 +51,19 @@ func (e *CommandExecutor) ExecuteCommand(commands []string) ([]string, error) {
 }
 
 func (e *CommandExecutor) ConfirmExecution(commands []string) bool {
-	fmt.Printf("👀 Se van a ejecutar los siguientes comandos:\n")
+	fmt.Println("\n👀 Se van a ejecutar los siguientes comandos:")
+	fmt.Println("─────────────────────────────────────────")
 	for _, command := range commands {
-		fmt.Printf("  - %s\n", command)
+		fmt.Printf("  ▶️  %s\n", command)
 	}
+	fmt.Println()
 
 	for {
 		fmt.Print("¿Quieres continuar? (si/no): ")
 
 		var response string
 		if _, err := fmt.Scanln(&response); err != nil {
-			fmt.Println("Error al leer la entrada:", err)
+			fmt.Printf("❌ Error al leer la entrada: %v\n", err)
 			continue
 		}
 
@@ -74,7 +76,7 @@ func (e *CommandExecutor) ConfirmExecution(commands []string) bool {
 		case "no", "n":
 			return false
 		default:
-			fmt.Println("Por favor, contesta 'sí' o 'no'. También puedes pulsar 'Enter' para confirmar.")
+			fmt.Println("⚠️ Por favor, contesta 'sí' o 'no'. También puedes pulsar 'Enter' para confirmar.")
 		}
 	}
 }

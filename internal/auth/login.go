@@ -21,6 +21,7 @@ func NewAuthService(cfg *config.Config) *AuthService {
 func (s *AuthService) Login() error {
 	deviceCode, err := RequestDeviceCode()
 	if err != nil {
+		fmt.Printf("🚫 No ha sido posible solicitar el código de dispositivo a Missions: %v\n", err)
 		return errors.New("🚫 No sido posible solicitar el código de dispositivo a Missions")
 	}
 

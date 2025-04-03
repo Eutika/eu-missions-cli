@@ -14,6 +14,45 @@ type ValidateCommand struct {
 	executor      *CommandExecutor
 }
 
+func (vc *ValidateCommand) handleCommandResponse(cmd *cobra.Command, response map[string]interface{}) {
+	commands, ok := response["commands"].([]interface{})
+	if !ok {
+		cmd.PrintErrf("❌ Formato de respuesta inválido: el campo 'commands' no es un array\n")
+		os.Exit(1)
+	}
+
+	fmt.Println("\n📊 Detalle de comandos:")
+	fmt.Println("─────────────────────")
+	for _, cmdData := range commands {
+		if cmdMap, ok := cmdData.(map[string]interface{}); ok {
+			isCorrect := cmdMap["isCorrect"].(bool)
+			statusIcon := "✅"
+			if !isCorrect {
+				statusIcon = "❌"
+			}
+			fmt.Printf("  %s  %s\n", statusIcon, cmdMap["command"])
+		}
+	}
+
+	fmt.Println("\n🏁 Resultado final:")
+	fmt.Println("────────────────")
+
+	isValid := response["isValid"].(bool)
+	percentageCorrect := response["percentageCorrect"].(float64)
+	requiredPercentage := response["requiredCorrectPercentage"].(float64)
+
+	resultIcon := "🎉"
+	resultText := "VALIDACIÓN SUPERADA"
+	if !isValid {
+		resultIcon = "❌"
+		resultText = "VALIDACIÓN NO SUPERADA"
+	}
+
+	fmt.Printf("  %s %s\n", resultIcon, resultText)
+	fmt.Printf("  ➡️ Porcentaje de acierto: %.0f%% (requerido: %.0f%%)\n\n",
+		percentageCorrect, requiredPercentage)
+}
+
 func NewValidateCommand(remoteService *services.RemoteService, executor *CommandExecutor) *cobra.Command {
 	vc := &ValidateCommand{
 		remoteService: remoteService,
@@ -28,49 +67,44 @@ func NewValidateCommand(remoteService *services.RemoteService, executor *Command
 			// Fetch command from remote
 			commands, err := vc.remoteService.FetchCommands(args[0])
 			if err != nil {
-				cmd.PrintErrf("Error retrieving command: %v\n", err)
+				cmd.PrintErrf("❌ Error retrieving command: %v\n", err)
+				os.Exit(1)
+			}
+
+			if len(commands) == 0 {
+				cmd.PrintErrf("❌ No se ha encontrado el comando con id: %s\n", args[0])
 				os.Exit(1)
 			}
 
 			// Confirm execution
 			if !vc.executor.ConfirmExecution(commands) {
-				fmt.Println("Command execution cancelled.")
+				fmt.Println("⚠️ Command execution cancelled.")
 				return
 			}
 
 			// Execute command and capture output
 			output, err := vc.executor.ExecuteCommand(commands)
 			if err != nil {
-				cmd.PrintErrf("Error executing command: %v\n", err)
+				cmd.PrintErrf("❌ Error executing command: %v\n", err)
 				os.Exit(1)
 			}
-			fmt.Println("")
-			fmt.Println("💻 Resultado en local:")
+			
+			fmt.Println("\n📋 RESULTADOS DE LA VALIDACIÓN")
+			fmt.Println("══════════════════════════════")
+
+			fmt.Println("\n💻 Resultado de ejecución local:")
+			fmt.Println("─────────────────────────────")
 			fmt.Println(output)
-			fmt.Println("------")
 
 			// Send result back to remote endpoint
-			if response, sendErr := vc.remoteService.SendCommandResult("validate", args[0], output); sendErr != nil {
-				cmd.PrintErrf("Error sending command result: %v\n", sendErr)
+			response, sendErr := vc.remoteService.SendCommandResult("validate", args[0], output)
+			if sendErr != nil {
+				cmd.PrintErrf("❌ Error enviando resultado del comando: %v\n", sendErr)
 				os.Exit(1)
-			} else {
-				commands, ok := response["commands"].([]interface{})
-				if !ok {
-					cmd.PrintErrf("Invalid response format: commands field is not an array\n")
-					os.Exit(1)
-				}
-
-				fmt.Println("\nValidation Summary:")
-				fmt.Println("- Commands:")
-				for _, cmdData := range commands {
-					if cmdMap, ok := cmdData.(map[string]interface{}); ok {
-						fmt.Printf("  - Command: %s, Correct: %v\n", cmdMap["command"], cmdMap["isCorrect"])
-					}
-				}
-				fmt.Printf("- Overall Validation: %v\n", response["isValid"])
-				fmt.Printf("- Percentage Correct: %.0f%%\n", response["percentageCorrect"])
-				fmt.Printf("- Required Correct Percentage: %.0f%%\n\n", response["requiredCorrectPercentage"])
 			}
+			
+			// Handle the command response
+			vc.handleCommandResponse(cmd, response)
 		},
 	}
 }
