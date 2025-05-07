@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"runtime"
 	"strings"
 
 	"github.com/eutika/eu-missions-cli/internal/config"
@@ -37,7 +38,12 @@ func (e *CommandExecutor) ExecuteCommand(commands []string) ([]string, error) {
 			return nil, fmt.Errorf("👮 Comando peligroso: '%s': %w", command, err)
 		}
 
-		cmd := exec.Command("bash", "-c", command)
+		var cmd *exec.Cmd
+		if runtime.GOOS == "windows" {
+			cmd = exec.Command("cmd", "/C", command)
+		} else {
+			cmd = exec.Command("bash", "-c", command)
+		}
 
 		// Capture both stdout and stderr
 		output, err := cmd.CombinedOutput()
