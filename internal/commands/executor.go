@@ -48,7 +48,9 @@ func (e *CommandExecutor) ExecuteCommand(commands []string) ([]string, error) {
 		// Capture both stdout and stderr
 		output, err := cmd.CombinedOutput()
 		if err != nil {
-			return results, fmt.Errorf("🔥 La ejecución del comando ['%s'] ha sido incorrecta: %w", command, err)
+			// Agrega el error y la salida al array de resultados
+			results = append(results, fmt.Sprintf("🔥 Error ejecutando '%s': %v\nSalida: %s", command, err, string(output)))
+			break // Si quieres continuar con el resto de comandos, elimina este break
 		}
 		results = append(results, string(output))
 	}
