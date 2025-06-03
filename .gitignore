@@ -75,3 +75,4 @@ __pycache__/
 venv/
 missions
 dist/
+missions-cli

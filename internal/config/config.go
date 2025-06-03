@@ -24,7 +24,7 @@ func NewConfig() *Config {
 		deviceCodeURL:  "https://missions.eutika.com/api/auth/device/code",
 		tokenURL:       "https://missions.eutika.com/api/auth/device/token",
 		dangerousPatterns: []string{
-			"rm -rf", "sudo", "dd ", ":(){ :|:& };:", "mkfs", "format",
+			"rm -rf", "sudo", "dd ", ":(){ :|:& };:", "mkfs", "format ",
 		},
 	}
 }

@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"errors"
 	"fmt"
 	"os/exec"
 	"runtime"
@@ -22,8 +21,14 @@ func NewCommandExecutor(cfg *config.Config) *CommandExecutor {
 
 func (e *CommandExecutor) ValidateCommand(command string) error {
 	for _, pattern := range e.config.GetDangerousPatterns() {
-		if strings.Contains(command, pattern) {
-			return errors.New("este comando no está permitido en Missions")
+		// Detectar comandos de formato más precisamente
+		if pattern == "format " {
+			// Evitar falsos positivos con --format
+			if strings.Contains(command, "format ") && !strings.Contains(command, "--format") {
+				return fmt.Errorf("este comando no está permitido en Missions: detectado patrón '%s' en '%s'", pattern, command)
+			}
+		} else if strings.Contains(command, pattern) {
+			return fmt.Errorf("este comando no está permitido en Missions: detectado patrón '%s' en '%s'", pattern, command)
 		}
 	}
 	return nil
@@ -35,7 +40,7 @@ func (e *CommandExecutor) ExecuteCommand(commands []string) ([]string, error) {
 	for _, command := range commands {
 		// Validate each command before execution
 		if err := e.ValidateCommand(command); err != nil {
-			return nil, fmt.Errorf("👮 Comando peligroso: '%s': %w", command, err)
+			return nil, fmt.Errorf("👮 : '%s': %w", command, err)
 		}
 
 		var cmd *exec.Cmd
