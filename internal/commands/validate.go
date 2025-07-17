@@ -61,38 +61,38 @@ func NewValidateCommand(remoteService *services.RemoteService, executor *Command
 
 	return &cobra.Command{
 		Use:   "validate [id]",
-		Short: "Valida una ordre des d'un servei remot",
+		Short: "Valida los comandos de una etapa",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Fetch command from remote
 			commands, err := vc.remoteService.FetchCommands(args[0])
 			if err != nil {
-				cmd.PrintErrf("❌ Error en recuperar l'ordre: %v\n", err)
+				cmd.PrintErrf("❌ Error la recuperar los comandos de la etapa: %v\n", err)
 				os.Exit(1)
 			}
 
 			if len(commands) == 0 {
-				cmd.PrintErrf("❌ No se ha encontrado el comando con id: %s\n", args[0])
+				cmd.PrintErrf("❌ No se ha encontrado el comando de la etapa con id: %s\n", args[0])
 				os.Exit(1)
 			}
 
 			// Confirm execution
 			if !vc.executor.ConfirmExecution(commands) {
-				fmt.Println("⚠️ Execució de l'ordre cancel·lada.")
+				fmt.Println("⚠️ Se ha cancelado la ejecución de los comandos de la etapa")
 				return
 			}
 
 			// Execute command and capture output
 			output, err := vc.executor.ExecuteCommand(commands)
 			if err != nil {
-				cmd.PrintErrf("❌ Error executing command: %v\n", err)
+				cmd.PrintErrf("❌ Error al ejecutar el comando: %v\n", err)
 				os.Exit(1)
 			}
 
-			fmt.Println("\n📋 RESULTATS DE LA VALIDACIÓ")
+			fmt.Println("\n📋 RESULTADOS DE LA VALIDACIÓN")
 			fmt.Println("══════════════════════════════")
 
-			fmt.Println("\n💻 Resultat d'execució local:")
+			fmt.Println("\n💻 Resultados de la ejeucución en local:")
 			fmt.Println("─────────────────────────────")
 			fmt.Println(output)
 

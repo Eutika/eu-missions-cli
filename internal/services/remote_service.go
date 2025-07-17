@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/eutika/eu-missions-cli/internal/auth"
 	"github.com/eutika/eu-missions-cli/internal/config"
@@ -55,8 +56,19 @@ func (s *RemoteService) executeRequest(req *http.Request) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("request failed with status %d", resp.StatusCode)
+		if resp.StatusCode != http.StatusOK {
+		body, errStatusCode := io.ReadAll(resp.Body)
+		if errStatusCode != nil {
+			return nil,
+				fmt.Errorf("request failed with status %d, could not read response body: %w", resp.StatusCode, errStatusCode)
+		}
+
+		var headers strings.Builder
+		for key, values := range resp.Header {
+			headers.WriteString(fmt.Sprintf("%s: %s\n", key, strings.Join(values, ", ")))
+		}
+
+		return nil, fmt.Errorf("request failed with status %d\nBody: %s\nHeaders:\n%s", resp.StatusCode, string(body), headers.String())
 	}
 
 	body, err := io.ReadAll(resp.Body)

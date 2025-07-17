@@ -22,7 +22,7 @@ func NewExecuteCommand(remoteService *services.RemoteService, executor *CommandE
 
 	return &cobra.Command{
 		Use:   "submit [id]",
-		Short: "Envía el resultado de la validación de una etapa de una misión",
+		Short: "Envía el resultado de los comandos de una etapa a Missions",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Fetch command from remote
