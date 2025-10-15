@@ -96,6 +96,62 @@ go build -o missions .
 4. Sube a la rama (`git push origin feature/FunciónIncreíble`)
 5. Abre una Solicitud de Extracción (Pull Request)
 
+## Seguridad
+
+### Almacenamiento de Tokens
+
+La CLI almacena los tokens de autenticación de forma segura utilizando el keyring del sistema operativo cuando está disponible:
+
+- **macOS**: Keychain
+- **Windows**: Credential Manager
+- **Linux**: gnome-keyring, KWallet, o kwallet
+
+#### Modo Fallback
+
+En entornos donde el keyring no está disponible (como máquinas virtuales sin GUI, contenedores Docker, o sesiones SSH), la CLI utiliza automáticamente un **modo fallback seguro**:
+
+- Los tokens se almacenan en un archivo cifrado con **AES-GCM (256-bit)**
+- Ubicación del archivo:
+  - Linux/macOS: `~/.config/missions-cli/.tokens`
+  - Windows: `%APPDATA%\missions-cli\.tokens`
+- La clave de cifrado se deriva del hostname y username de la máquina
+- El archivo tiene permisos restrictivos (0600) - solo lectura/escritura para el propietario
+
+⚠️ **Nota de Seguridad**: Aunque el modo fallback es seguro para la mayoría de casos de uso, el keyring del sistema proporciona mayor seguridad. Si ves un aviso de seguridad al hacer login, considera instalar un keyring:
+
+**En Ubuntu/Debian:**
+
+```bash
+sudo apt-get install gnome-keyring
+# Iniciar el keyring en sesiones sin GUI
+eval $(dbus-launch --sh-syntax)
+gnome-keyring-daemon --start --components=secrets
+```
+
+**En entornos Vagrant:**
+
+```bash
+# Agregar al Vagrantfile o script de provisión
+sudo apt-get install -y gnome-keyring dbus-x11
+```
+
+### Modelo de Seguridad
+
+**El almacenamiento cifrado protege contra:**
+
+- ✅ Lectura accidental del archivo de tokens
+- ✅ Otros usuarios sin privilegios en el sistema
+- ✅ Backups sin cifrar
+- ✅ Sincronización accidental a repositorios
+
+**No protege contra:**
+
+- ❌ Usuarios con privilegios de root/administrador
+- ❌ Malware ejecutándose con los permisos de tu usuario
+- ❌ Análisis forense del sistema
+
+Para entornos de alta seguridad, usa siempre el keyring del sistema operativo.
+
 ## Licencia
 
 [MIT](LICENSE)
