@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -47,7 +48,14 @@ func (e *CommandExecutor) ExecuteCommand(commands []string) ([]string, error) {
 		if runtime.GOOS == "windows" {
 			cmd = exec.Command("cmd", "/C", command)
 		} else {
-			cmd = exec.Command("bash", "-c", command)
+			// Get the current user's shell to ensure environment consistency
+			userShell := os.Getenv("SHELL")
+			if userShell == "" {
+				userShell = "/bin/bash" // Fallback to bash
+			}
+
+			// Use login shell to ensure PATH and environment are properly loaded
+			cmd = exec.Command(userShell, "-l", "-c", command)
 		}
 
 		// Capture both stdout and stderr
