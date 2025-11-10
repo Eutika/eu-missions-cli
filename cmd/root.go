@@ -20,7 +20,7 @@ func NewRootCommand(deps *CommandDependencies) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:     "missions",
 		Short:   "Missions CLI (Command Line Interface)",
-		Version: "1.0.9",
+		Version: "1.0.10",
 	}
 
 	rootCmd.AddCommand(
